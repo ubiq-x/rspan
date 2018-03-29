@@ -28,12 +28,9 @@
     function init() {
       app = $("app");
       if (!opener) {
-        app.innerHTML = "This page has been accessed in an incorrect way. The correct URL to start at is: <a href=\"http://www.sis.pitt.edu/~tloboda/res/research/psych-tests/rspan\">http://www.sis.pitt.edu/~tloboda/res/research/psych-tests/rspan</a>.";
+        app.innerHTML = "This page has been accessed in an incorrect way. Try: <a href=\"https://ubiq-x.github.io/rspan\">https://ubiq-x.github.io/rspan</a>.";
         return;
       }
-      
-      if (opener && opener.opener && opener.opener.site) opener.opener.site.log("win-open:Reading span task: Start");
-      else opener.$log("http://www.sis.pitt.edu/~tloboda", "win-open:Reading span task: Start", !opener.env.agent.ff, { s: opener.state.sessId, n: ++opener.state.logCnt })
       
       ehResize();
       
@@ -60,8 +57,6 @@
     
     // ---------------------------------------------------------------------------------------------
     function uninit() {
-      if (opener && opener.opener && opener.opener.site) opener.opener.site.log("win-close:Reading span task: Start");
-      else opener.$log("http://www.sis.pitt.edu/~tloboda", "win-close:Reading span task: Start", !opener.env.agent.ff, { s: opener.state.sessId, n: ++opener.state.logCnt })
     }
   </script>
 </head>
