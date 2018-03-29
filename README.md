@@ -6,7 +6,7 @@ The reading span (RSPAN) task as a Web application.  This task estimates the siz
 There are two ways of launching the task.  To launch it off the internet, simply navigate to:
 [https://ubiq-x.github.io/rspan](https://ubiq-x.github.io/rspan/)
 
-If you don't have internet access on your experimental machine or simply prefer to run in localy, simply clone this repository:
+If you don't have internet access on your experimental machine or simply prefer to run in localy, clone this repository:
 ```
 git clone https://github.com/ubiq-x/rspan
 ```
