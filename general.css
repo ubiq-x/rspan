@@ -1,0 +1,5 @@
+body  { margin: 0px; }
+body, td, div, span, input  { font-family: Calibri,Tahoma,Verdana,Helvetica,Arial,sans-script; cursor: default; }
+
+input[type='button'].normal        { padding: 10px 30px 10px 30px; border: 2px solid #bbbbbb; background-color: #f5f5f5; font-weight: bold; font-size: 1.5em; }
+input[type='button'].normal:hover  { border: 2px solid #2D6AA6; background-color: #D1E8FF; color: #000000; font-weight: bold; }

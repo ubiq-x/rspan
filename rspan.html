@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+
+<head>
+  <title>Reading Span Task</title>
+  
+  <link rel="stylesheet" type="text/css" href="general.css" />
+  <link rel="stylesheet" type="text/css" href="rspan.css" />
+  
+  <script type="text/javascript" src="$.js"></script>
+  <script type="text/javascript" src="Timer.js"></script>
+  <script type="text/javascript" src="RSpan.js"></script>
+  
+  <script type="text/javascript">
+    var app = null;
+    var rs = null;
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    function ehResize() {
+      if (app) app.style.height = window.innerHeight + "px";
+    }
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    function init() {
+      app = $("app");
+      if (!opener) {
+        app.innerHTML = "This page has been accessed in an incorrect way. The correct URL to start at is: <a href=\"http://www.sis.pitt.edu/~tloboda/res/research/psych-tests/rspan\">http://www.sis.pitt.edu/~tloboda/res/research/psych-tests/rspan</a>.";
+        return;
+      }
+      
+      if (opener && opener.opener && opener.opener.site) opener.opener.site.log("win-open:Reading span task: Start");
+      else opener.$log("http://www.sis.pitt.edu/~tloboda", "win-open:Reading span task: Start", !opener.env.agent.ff, { s: opener.state.sessId, n: ++opener.state.logCnt })
+      
+      ehResize();
+      
+      var p = opener.params;
+      rs = RSpan(app);
+      rs.run(
+        eval(p.items.value),
+        eval(p.recallPrompt.value),
+        p.sent.value.split("\n"),
+        eval(p.timeItemPres.value),
+        eval(p.timeOutcomePres.value),
+        eval(p.timeBtnDelay.value),
+        eval(p.practiceItemCnt.value),
+        eval(p.practiceSentCnt.value),
+        eval(p.practiceSetSize.value),
+        eval(p.setSizes.value),
+        p.randSetSizeOrd.checked,
+        p.randSentOrd.checked,
+        eval(p.sentLenL.value),
+        eval(p.sentLenU.value)
+      );
+    }
+    
+    
+    // ---------------------------------------------------------------------------------------------
+    function uninit() {
+      if (opener && opener.opener && opener.opener.site) opener.opener.site.log("win-close:Reading span task: Start");
+      else opener.$log("http://www.sis.pitt.edu/~tloboda", "win-close:Reading span task: Start", !opener.env.agent.ff, { s: opener.state.sessId, n: ++opener.state.logCnt })
+    }
+  </script>
+</head>
+
+
+<body onload="init();" onunload="uninit();" onkeypress="return false;" onselectstart="return false;" oncontextmenu="return false;" onresize="ehResize();">
+
+<table width="100%" cellspacing="0" cellpadding="0">
+<tr>
+<td id="app" style="text-align: center; vertical-align: middle; height: 100px;"></td>
+</tr>
+</table>
+
+</body>
+
+
+</html>

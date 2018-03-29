@@ -1,0 +1,40 @@
+#mask  { position: fixed; left: 0px; right: 0px; top: 0px; bottom: 0px; z-index: 10; }
+
+#btn                             { display: none; position: fixed; left: 0px; right: 0px; bottom: 40px; z-index: 20; }
+#btn input[type='button']        { padding: 10px 30px 10px 30px; border: 2px solid #bbbbbb; background-color: #f5f5f5; color: #444444; font-weight: bold; font-size: 1.5em; }
+#btn input[type='button']:hover  { border: 2px solid #2D6AA6; background-color: #D1E8FF; color: #000000; font-weight: bold; }
+
+#txt-instr      { display: none; }
+#txt-instr div  { padding: 40px; color: #125194; text-align: center; font-weight: bold; font-size: 2em; }
+
+#txt-item      { display: none; }
+#txt-item div  { background-color: #ffffff; color: #000000; text-align: center; font-weight: bold; font-size: 4em; }
+
+#txt-stim      { display: none; }
+#txt-stim div  { background-color: #ffffff; color: #000000; text-align: center; font-weight: bold; font-size: 2em; }
+
+#true-false                                    { display: none; position: fixed; left: 0px; right: 0px; bottom: 40px; z-index: 20; }
+#true-false input[type='button'].resp          { margin-left: 10px; margin-right: 10px; padding: 10px 30px 10px 30px;font-weight: bold; font-size: 2em; }
+#true-false input[type='button'].resp-1        { border: 2px solid #56CF34; background-color: #96FF79; }
+#true-false input[type='button'].resp-1:hover  { border: 2px solid #3FB81D; background-color: #7EFF5A; }
+#true-false input[type='button'].resp-0        { border: 2px solid #ED5252; background-color: #FD7272; }
+#true-false input[type='button'].resp-0:hover  { border: 2px solid #CE2D2D; background-color: #FB6161; }
+
+#recall-prompt                               { display: none; }
+#recall-prompt input[type='button']          { padding: 10px 30px 10px 30px; margin: 8px; border: 2px solid #bbbbbb; background-color: #f5f5f5; color: #222222; font-weight: bold; font-size: 3em; }
+#recall-prompt input[type='button']:hover    { border: 2px solid #2D6AA6; background-color: #D1E8FF; color: #000000; font-weight: bold; }
+
+#recall-seq       { display: none; position: fixed; left: 0px; right: 0px; top: 40px; z-index: 15; }
+#recall-seq span  { padding: 5px 15px 5px 15px; margin: 4px; border: 1px solid #cccccc; background-color: #fafafa; color: #555555; font-weight: bold; font-size: 1.5em;  }
+
+#reset-ok                                     { display: none; position: fixed; left: 0px; right: 0px; bottom: 40px; z-index: 20; }
+#reset-ok input[type='button'].enabled        { margin-left: 10px; margin-right: 10px; padding: 10px 30px 10px 30px; border: 2px solid #bbbbbb; background-color: #f5f5f5; color: #444444; font-weight: bold; font-size: 1.5em; }
+#reset-ok input[type='button'].enabled:hover  { border: 2px solid #2D6AA6; background-color: #D1E8FF; color: #000000; font-weight: bold; }
+#reset-ok input[type='button'].disabled       { margin-left: 10px; margin-right: 10px; padding: 10px 30px 10px 30px; border: 2px solid #bbbbbb; background-color: #f5f5f5; color: #aaaaaa; font-weight: bold; font-size: 1.5em; }
+
+#recall-outcome                              { display: none; }
+#recall-outcome input[type='button'].item    { padding: 10px 30px 10px 30px; margin: 8px; color: #000000; font-weight: bold; font-size: 3em; }
+#recall-outcome input[type='button'].item-1  { border: 2px solid #3FB81D; background-color: #7EFF5A; }
+#recall-outcome input[type='button'].item-0  { border: 2px solid #CE2D2D; background-color: #FB6161; }
+
+#stim-resp-acc  { display: none; position: fixed; top: 20px; right: 20px; color: #ff0000; font-weight: bold; font-size: 3em; z-index: 1; }

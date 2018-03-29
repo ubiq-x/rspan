@@ -1,0 +1,518 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+
+<head>
+  <title>Reading Span Task</title>
+
+  <link rel="stylesheet" type="text/css" href="general.css" />
+  <style type="text/css">
+    body  { margin: 10px; font-family: Calibri,Tahoma,sans-serif; }
+
+    div.ackn  { border: 1px solid #666666; padding: 10px; background-color: #fff2b3; }
+
+    input[type='text']    { padding: 2px; border: 1px solid #888888; background-color: #fcfcfc; color: #085FB3; font-weight: bold; }
+    input[type='text'].l  { width: 600px; }
+    input[type='text'].m  { width: 300px; }
+    input[type='text'].s  { width: 40px; }
+
+    textarea  { width: 800px; height: 300px; padding: 2px; border: 1px solid #888888; background-color: #fcfcfc; color: #085FB3; font-weight: bold; font-size: 0.85em; }
+
+    td       { padding: 2px; text-align: left; vertical-align: top; }
+    td.info  { color: #aaaaaa; }
+
+    #msg            { position: fixed; display: none; top: 8px; right: 8px; padding: 4px 8px 4px 8px; background-color: #ccffd5; border: 2px solid #067600; font-size: 0.8em; }
+    #res-div-title  { width: 100%; border: 1px solid #666666; background-color: #666666; padding: 4px; text-align: left; color: #ffffff; font-weight: bold; }
+    #res-div        { width: 100%; border: 1px solid #666666; background-color: #ffffff; padding: 4px; text-align: left; font-size: 0.7em; font-family: Courier New; }
+    #copy           { font-size: 0.8em; color: #666666; }
+  </style>
+
+  <script type="text/javascript" src="$.js"></script>
+
+  <script type="text/javascript">
+    var MSG = {
+      items: "<b><u>Items</u></b><br /><br />Items to be remembered and recalled.",
+      recallPrompt: "<b><u>Recall prompt</u></b><br /><br />Defines a grid of the item recall prompt (rows need to be of equal length).",
+      timeItemPres: "<b><u>Time: Item presentation</u></b><br /><br />The amount of time an item to be recalled should be presented.",
+      timeOutcomePres: "<b><u>Time: Outcome presentation</u></b><br /><br />The amount of time the recall outcome should be presented.",
+      timeBtnDelay: "<b><u>Time: Button delay</u></b><br /><br />The amount of time to pause after the 'continue' button has been clicked.",
+      practiceItemCnt: "<b><u>Practice: Item count</u></b><br /><br />The amount of items to be presented during the item-only part of the practice.",
+      practiceSentCnt: "<b><u>Practice: Sentence count</u></b><br /><br />The amount of sentences to be presented during the sentence-only part of the practice. Ensure this number is sufficiently high.<br /><br />The average time it takes for a subject to judge the correctness of a sentence is estimated based on responses to those<br />sentences (excluding the first one). Make sure you have enough of them to feel comfortable with that estimation.",
+      practiceSetSize: "<b><u>Practice: Set size</u></b><br /><br />The amount of items and sentences to be presented in the item-and-sentence part of the practice.",
+      setSizes: "<b><u>Set sizes</u></b><br /><br />Set sizes to be used in the real test.",
+      randSetSizeOrd: "",
+      randSentOrd: "",
+      sentLen: "<b><u>Sentence length</u></b><br /><br />Defines the lower and upper bounds on the length of a sentences (in words). All sentences not satisfying the length criterion will be excluded.",
+      sent: "<b><u>Sentences</u></b><br /><br />One sentence per line. Each sentence need to have a pair of bracers. The first word or phrase inside of those braces is for the correct version<br />of the sentence while the second is for the incorrect version. Those words of phrases need to be separated by the pipe character (|).<br /><br />Note, that for every sentence, the version (correct or incorrect) to be presented to the subject will be chosen at random.",
+      res: "<b><u>Results</u></b><br /><br />Results of all trials (including the practice one) will be outputted here. The format for each item-sentence pair presented is:<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;[item],[recall],[recall correct],[sentence judgement correct]; ...<br /><br />Four scoring schemes will be outputted: PU-partial unit, PL-partial load, FU-full unit, FL-full load (see references for explanation).<br /><br />The order of set sizes actually presented (may be important for randomized orders) and the overall accuracy on the secondary<br />task (i.e., sentence assessments task) is also outputted.<br /><br /><hr /><br />You need to take care of saving the contents of this box. No persistence is provided by this application.<br /><br />If you use Firefox the content of this box will not be removed when the page is refreshed (e.g., by pressing F5 or CTRL+R).<br />Therefore, for safety, I recommend you use Firefox to administer this task."
+    };
+
+    var msg = null;
+    var resTA = null;
+    var resDiv = null;
+
+    var params = {};
+
+    var env = {
+      agent    : {
+        ie: (navigator.appName === "Microsoft Internet Explorer"),
+        ff: (navigator.userAgent.indexOf("Firefox") !== -1)
+      },
+      platform : { iphone: (navigator.userAgent.indexOf("iPhone") !== -1) }
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    function appendRes(r) {
+      resTA.value += r + "<br />";
+      resDiv.innerHTML = resTA.value;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function getArr(s) {
+      var A = null;
+      var ex = false;
+      try {
+        eval("A = " + s);
+      }
+      catch (e) {
+        ex = true;
+      }
+
+      return (!ex && isArr(A) ? A : null);
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function init() {
+      msg = $("msg");
+      resTA = $("res-ta");
+      resDiv = $("res-div");
+
+      params.items           = $("items");
+      params.recallPrompt    = $("recall-prompt");
+      params.timeItemPres    = $("time-item-pres");
+      params.timeOutcomePres = $("time-outcome-pres");
+      params.timeBtnDelay    = $("time-btn-delay");
+      params.practiceItemCnt = $("practice-item-cnt");
+      params.practiceSentCnt = $("practice-sent-cnt");
+      params.practiceSetSize = $("practice-set-size");
+      params.setSizes        = $("set-sizes");
+      params.randSetSizeOrd  = $("rand-set-size-ord");
+      params.randSentOrd     = $("rand-sent-ord");
+      params.sentLenL        = $("sent-len-l");
+      params.sentLenU        = $("sent-len-u");
+      params.sent            = $("sent");
+
+      resetAll();
+
+      appendRes("\n----\n");
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function isPosInt(x) { x = parseInt(x); return (typeof(x) !== "object" && !isNaN(x) && x > 0 && Math.round(x) === x);}
+    function isNonEmptyStr(x) { return (typeof(x) === "string" && x.length > 0); }
+    function isArr(x) { return (x.constructor.toString().indexOf("Array") !== -1); }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function resetAll() {
+      resetItems();
+      resetRecallPrompt();
+      resetTimeItemPres();
+      resetTimeOutcomePres();
+      resetTimeBtnDelay();
+      resetPracticeItemCnt();
+      resetPracticeItemCnt();
+      resetPracticeSetSize();
+      resetPracticeSentCnt();
+      resetSetSizes();
+      resetRandSetSizeOrd();
+      resetRandSentOrd();
+      resetSentLen();
+      resetSent();
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function resetItems()           { params.items.value = "[\"F\", \"H\", \"J\", \"K\", \"L\", \"N\", \"P\", \"Q\", \"R\", \"S\", \"T\", \"Y\"]"; }
+    function resetRecallPrompt()    { params.recallPrompt.value = "[[\"F\", \"H\", \"J\", \"K\"], [\"L\", \"N\", \"P\", \"Q\"], [\"R\", \"S\", \"T\", \"Y\"]]"; }
+    function resetTimeItemPres()    { params.timeItemPres.value = "1000"; }
+    function resetTimeOutcomePres() { params.timeOutcomePres.value = "2000"; }
+    function resetTimeBtnDelay()    { params.timeBtnDelay.value = "250"; }
+    function resetPracticeItemCnt() { params.practiceItemCnt.value = "3"; }
+    function resetPracticeSentCnt() { params.practiceSentCnt.value = "11"; }
+    function resetPracticeSetSize() { params.practiceSetSize.value = "3"; }
+    function resetSetSizes()        { params.setSizes.value = "[2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7]"; }
+    function resetRandSetSizeOrd()  { params.randSetSizeOrd.checked = true; }
+    function resetRandSentOrd()     { params.randSentOrd.checked = true; }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function resetSentLen() {
+      params.sentLenL.value = "10";
+      params.sentLenU.value = "15";
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function resetSent() {
+      params.sent.value =
+        "The host greeted all the guests and asked them to sit at the {table|sky}.\n" +
+        "John never liked {crowds|chocolate} and that is why he now lives in the country.\n" +
+        "The prosecutor's {case|dish} was lost due to the lack of supporting evidence.\n" +
+        "The gray-stone building was in Atlanta's most central part on a narrow {street|bicycle}.\n" +
+        "It was a gloomy evening, towards the {autumn|match} of the year 1676.\n" +
+        "{Driving|Watching TV} in the rain is dangerous because of reduced adhesion to the road.\n" +
+        "Margie moved into her new apartment at the end of the {summer|meeting}.\n" +
+        "The principal introduced the new {president|razor} of the junior class.\n" +
+        "None of the students wanted to have {an exam|their arm} after Spring Break.\n" +
+        "Mark told Janet that he would meet {her|a keyboard} after baseball practice.\n" +
+        "Bill complained that the magazine included more ads than {articles|nails}.\n" +
+        "The angry {man|mouse} called the senator to complain about the new tax law.\n" +
+        "The policeman demanded to see Jim's {license|pumpkin} and registration.\n" +
+        "A strict {vegetarian|teacher}, Jennifer does not eat chicken or beef.\n" +
+        "Nancy's kitchen was infested with carpenter ants and {roaches|lawn mowers}.\n" +
+        "The {hurricane|pudding} destroyed houses in the village and left many homeless.\n" +
+        "Amy told the teacher that her {dog|barber} ate her homework assignment.\n" +
+        "Ed was forbidden to attend college {parties|bananas} while he was in high school.\n" +
+        "Sheri and her friends went to Hawaii for their summer {vacation|fork}.\n" +
+        "Mark put too {much soap|many balloons} in the washing machine, and it overflowed.\n" +
+        "The circus tents were crowded with animals, clowns, and {children|nail cutters}.\n" +
+        "The {bear|pencil} chased after the forest ranger who was carrying honey.\n" +
+        //"The best place that serves coffee and muffins is Dunkin {Donuts|Jeans}.\n" +
+        "Mr. Jones asked his son to water the {plants|cats} and mow the lawn.\n" +
+        "The bride's {mother|school} cried during the wedding ceremony.\n" +
+        "The drunk driver lost control, crashed into a street {sign|wallet} and died.\n" +
+        "Mary was the only teenager who attended the square dance/theater in town.\n" +
+        "The burglar broke the window and quietly sneaked into the {house|headphone}.\n" +
+        "Jimmy was sent to the principal's {office|pocket} because he punched Sally.\n" +
+        "Most job applications require at least one letter of {recommendation|contemplation}.\n" +
+        "After jumping out of the plane, the paratrooper was relieved when his {parachute|book} finally opened.\n" +
+        "It is not unusual to see {an armadillo|a statue} cross a road in Texas.\n" +
+        "Erik took his sick {dog|knife} to the veterinarian on Tuesday.\n" +
+        "Al stretched before running to avoid pulling a ligament or {muscle|watch}.\n" +
+        "The boxer flared his nostrils as he entered the boxing {ring|cable}.\n" +
+        "Mary was thrilled to receive a trinket from her {boyfriend|wall}.\n" +
+        "Covered with maggots, the rag was removed from the smelly dorm {room|dish}.\n" +
+        "Propelled from a submarine, the {torpedo|anaconda} struck the large battleship.\n" +
+        "Alfred served baked haddock and {asparagus|rocks} to his beautiful girlfriend.\n" +
+        "The dancer resembled a gazelle as he leaped across the {stage|schedule}.\n" +
+        "The little {girl|crayon} had dimples in her chin and a freckle on her nose.\n" +
+        "The beach was covered with pebbles, sea shells, and {little red starfish|shampoo with conditioner}.\n" +
+        "The child had a nightmare about being chased by hornets and {wasps|cardboard}.\n" +
+        "Biff dove into the {water|novel} and retrieved a scallop from the ocean floor.\n" +
+        "The little girl picked all of the {cashews|poems} out of the trail mix.\n" +
+        "The athlete broke his {pelvis|lunchbox} and could not participate in the race.\n" +
+        "The game show contestant won a quartz watch and a {television|application} set.\n" +
+        "The careless {mailman|caterpillar} delivered the parcel to the wrong house.\n" +
+        "After receiving money, the beggar bought cigarettes and a case of {beer|uncertainty}.\n" +
+        "At the technology party, people were dressed as robots and {computers|cathedrals}.\n" +
+        "The stunning actress wore {a black|an intelligent} sequin dress to the award ceremony.\n" +
+        "An icicle formed on his beard, when the man ran in the {blizzard|confusion}.\n" +
+        "The clumsy assistant dropped a beaker, and it shattered on the {floor|ceiling}.\n" +
+        "When Al's retina became inflamed and sore, he visited the {eye|ear} doctor.\n" +
+        "Kevin reached for Miranda's {arm|condominium} and tried to keep her from leaving.\n" +
+        "Michael used his strong {backhand strokes|math skills} many times during the long tennis match.\n" +
+        "Martha went to the closest {deck|telephone booth} and looked out over the ocean.\n" +
+        "Carrie quickly came downhill when her {mother|screwdriver} called her for dinner.\n" +
+        "Rich read a story about a beautiful {fairy|clock} and her wonderful adventures.\n" +
+        "My grandfather bought a small {farmland|banana} located in western Pennsylvania.\n" +
+        "Terry could see a large {fireball|marshmallow} shoot out of the burning building.\n" +
+        "Tara drew a {circle|politician} with freehand imprecision for her art class.\n" +
+        "My old uncle's gravestone had been {vandalized|shaved} over night.\n" +
+        "The kindergarten's {handcart|checkbook} was used to transport supplies.\n" +
+        "The queen spoke to the young highland {prince|rat} about the current war.\n" +
+        "The fleeing refugee looked back on his beloved {homeland|coffeemaker} before he ran away.\n" +
+        "The young children's horseplay made their old {mother|motorcycle} very nervous.\n" +
+        "In math class we had to complete long and difficult {homework|gymnastics} problems.\n" +
+        "We landed at the country's main and largest {airport|document} after the long flight.\n" +
+        "Karen watched the young nurse aid the {doctor|cameraman} during a difficult brain operation.\n" +
+        "Matthew threw the ball over and hit his brother/spider web accidentally.\n" +
+        "Bob's sister threw the cold {snowball|snowmobile} right at his face yesterday.\n" +
+        "The {citizens|snakes} flocked to the town's stronghold during the enemy attack.\n" +
+        "Rebecca had gotten uphill before all of the other {children|tractors}.\n" +
+        "The girl wanted a smaller {waistband|clock} on the skirt she tried on in the Gap.\n" +
+        "The couple could see the disgusting waste and filth/stilts of the large garbage dump.\n" +
+        "The modern {artist|table} covered the canvas with whitewash for the new exhibit.\n" +
+        "My father worked on the large woodcraft project all afternoon in his {shop|candle}.\n" +
+        "Mary yelled as the young {child|checkbook} pulled her armchair across the hardwood floor.\n" +
+        "Tim damaged his {back|lamppost} one day before his important wrestling match.\n" +
+        "The frustrated player threw the baseball into the crowded {stadium|shoe}.\n" +
+        "Jerry could see the old {cow|hammer} and knew that it would probably soon die.\n" +
+        "My mother says that the {fireflies|screws} will die if we keep them in a jar.\n" +
+        "The manager began her first and only employee {meeting|hat} of the day.\n" +
+        "Richard kicked his {football|knee} through the goal for the extra point.\n" +
+        "Before Michelle went to class she put her {hairpin|graveyard} in her jacket pocket.\n" +
+        "Tom's {aunt|automobile} told him about the hardship she faced before she came to America.\n" +
+        "Valerie dropped her headband into a large mud puddle as she walked to {school|shoelaces}.\n" +
+        "We had to walk through the lowland marshes to get to the secret hunting {spot|marmalade}.\n" +
+        "Kim could not wait for {nightfall|John} when she would go on her first date with Adam.\n" +
+        "We were told to avoid the quicksand as we walked through the {desert|lightning}.\n" +
+        "The author wrote his {book|alligator} in short and quick bursts until he was finished.\n" +
+        "The new government decided to stone all criminals that committed {murder|socks}.\n" +
+        "The farmer said that the waterfall we were hearing was four {miles|thunderstorms} away.\n" +
+        "Michael Jordan is considered the most famous {basketball|sushi} player ever.\n" +
+        "When I was younger I hated basketball even though I was over {six|video} feet tall.\n" +
+        "The teens took a hike with their picnic {basket|stadium} all the way to Shyer Falls.\n" +
+        "I let my girlfriend carry the heavy basket all the way to our {apartment|Scotland}."
+        ;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function showMsg(m) {
+      if (m) {
+        msg.innerHTML = m;
+        msg.style.display = "block";
+      }
+      else msg.style.display = "none";
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function start() {
+      if (!validateAll()) return;
+      window.open("rspan.html", "", "fullscreen=1,location=0,menubar=0,titlebar=0,toolbar=0,status=0");
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateAll() {
+      if (!validateItems()) return 0;
+      if (!validateRecallPrompt()) return 0;
+      if (!validateTimeItemPres()) return 0;
+      if (!validateTimeOutcomePres()) return 0;
+      if (!validateTimeBtnDelay()) return 0;
+      if (!validatePracticeItemCnt()) return 0;
+      if (!validatePracticeSentCnt()) return 0;
+      if (!validatePracticeSetSize()) return 0;
+      if (!validateSentLen()) return 0;
+      if (!validateSetSizes()) return 0;
+      if (!validateSent()) return 0;
+
+      return 1;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function areArr(X) { return $lfold(function (a,b) { return a && b; }, $map(function (x) { return isArr(x); }, X), true); }
+    function areNonEmptyStr(X) { return $lfold(function (a,b) { return a && b; }, $map(function (x) { return isNonEmptyStr(x); }, X), true); }
+    function arePosInt(X) { return $lfold(function (a,b) { return a && b; }, $map(function (x) { return isPosInt(x); }, X), true); }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateItems() {
+      if (params.items.value.length === 0) { alert("'Items' is a mandatory field."); return 0; }
+
+      var A = getArr(params.items.value);
+      if (!A) { alert("'Set sizes' need to contain a valid JavaScript array. Use the default value as an example."); return 0; }
+      if (!areNonEmptyStr(A)) { alert("All values in the 'Items' array need to be non-empty strings."); return 0; };
+
+      return 1;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateRecallPrompt() {
+      if (params.recallPrompt.value.length === 0) { alert("'Recall prompt' is a mandatory field."); return 0; }
+
+      var A = getArr(params.recallPrompt.value);
+      if (!A) { alert("'Recall prompt' need to contain a valid JavaScript array. Use the default value as an example."); return 0; }
+      if (!areArr(A)) { alert("All values in the 'Set sizes' array need to be arrays themselves."); return 0; };
+
+      if (A.length > 1) {
+        var len = A[0].length;
+        var eqLen = true;
+        $map(function (X) { eqLen = eqLen && len === X.length; }, A);
+        if (!eqLen) { alert("All arrays of the 'Recall prompt' array need to be of the same length."); return 0; };
+      }
+
+      var strOnly = true;
+      $map(
+        function (X) {
+          $map(function (x) { strOnly = strOnly && isNonEmptyStr(x); }, X);
+        },
+        A
+      );
+      if (!strOnly) { alert("All values in each array of the 'Recall prompt' array need to be non-empty strings."); return 0; };
+
+      return 1;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateTimeItemPres()    { var v = params.timeItemPres.value; if (!isPosInt(v)) { alert("'Time: Item presentation' has to be a positive integer."); return 0; } else return 1; }
+    function validateTimeOutcomePres() { var v = params.timeOutcomePres.value; if (!isPosInt(v)) { alert("'Time: Outcome presentation' has to be a positive integer."); return 0; } return 1; }
+    function validateTimeBtnDelay()    { var v = params.timeBtnDelay.value; if (!isPosInt(v)) { alert("'Time: Button delay' has to be a positive integer."); return 0; } return 1; }
+    function validatePracticeItemCnt() { var v = params.practiceItemCnt.value; if (!isPosInt(v)) { alert("'Practice: Item count' has to be a positive integer."); return 0; } return 1; }
+    function validatePracticeSentCnt() { var v = params.practiceSentCnt.value; if (!isPosInt(v)) { alert("'Practice: Sentence count' has to be a positive integer."); return 0; } return 1; }
+    function validatePracticeSetSize() { var v = params.practiceSetSize.value; if (!isPosInt(v)) { alert("'Practice: Set size' has to be a positive integer."); return 0; } return 1; }
+    function validateSentLen()         { var v01 = params.sentLenL.value; var v02 = params.sentLenU.value; if (!isPosInt(v01) || !isPosInt(v02)) { alert("Both 'Sentence length' values need to be a number."); return 0; } return 1; }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateSetSizes() {
+      if (params.setSizes.value.length === 0) { alert("'Set sizes' is a mandatory field."); return 0; }
+
+      var A = getArr(params.setSizes.value);
+      if (!A) { alert("'Set sizes' need to contain a valid JavaScript array. Use the default value as an example."); return 0; }
+      if (!arePosInt(A)) { alert("All values in the 'Set sizes' array need to be positive integers."); return 0; };
+
+      return 1;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function validateSent() {
+      if (params.sent.value.length === 0) { alert("'Sentences' is a mandatory field."); return 0; }
+      return 1;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    function uninit() {
+    }
+  </script>
+</head>
+
+
+<body onload="init();" onunload="uninit();">
+
+
+<div id="msg" onclick="$hide(msg);"></div>
+
+<div align="center" style="margin-top: 10px; width: 100%;">
+  <table cellspacing="0" cellpadding="0">
+
+  <tr onmouseover="showMsg('')">
+    <td colspan="3">
+      <input type="button" value="START" onclick="start();" class="normal" />&nbsp;&nbsp;
+      <input type="button" value="Reset all parameters" onclick="if (confirm('Reset all parameters to their default values?')) resetAll();" class="normal" /><br />
+      <br />
+      <br />
+    </td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.items)">
+    <td>Items</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="items" class="l" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.recallPrompt)">
+    <td>Recall prompt</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="recall-prompt" class="l" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.timeItemPres)">
+    <td>Time: Item presentation</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="time-item-pres" class="s" /> ms</td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.timeOutcomePres)">
+    <td>Time: Outcome presentation</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="time-outcome-pres" class="s" /> ms</td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.timeBtnDelay)">
+    <td>Time: Button delay</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="time-btn-delay" class="s" /> ms</td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.practiceItemCnt)">
+    <td>Practice: Item count</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="practice-item-cnt" class="s" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.practiceSentCnt)">
+    <td>Practice: Sentence count</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="practice-sent-cnt" class="s" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.practiceSetSize)">
+    <td>Practice: Set size</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="practice-set-size" class="s" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.setSizes)">
+    <td>Set sizes</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="text" id="set-sizes" class="m" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.randSetSizeOrd)">
+    <td>Randomize set size order</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="checkbox" id="rand-set-size-ord" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.randSentOrd)">
+    <td>Randiomize sentence order</td>
+    <td width="10">&nbsp;</td>
+    <td><input type="checkbox" id="rand-sent-ord" /></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.sentLen)">
+    <td>Sentence length</td>
+    <td width="10">&nbsp;</td>
+    <td>
+      Between
+      <input type="text" id="sent-len-l" class="s" />
+      and
+      <input type="text" id="sent-len-u" class="s" />
+      words
+    </td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.sent)">
+    <td>Sentences</td>
+    <td width="10">&nbsp;</td>
+    <td><textarea id="sent" wrap="off"></textarea></td>
+  </tr>
+
+  <tr onmouseover="showMsg(MSG.res)">
+    <td colspan="3">
+      <br />
+      <br />
+      <textarea id="res-ta" style="display: none;"></textarea>
+      <div id="res-div-title">Results</div>
+      <div id="res-div"></div>
+      <br />
+    </td>
+  </tr>
+
+  <tr onmouseover="showMsg('')">
+    <td colspan="3">
+      <div class="ackn">
+        <b>Citing</b>: Loboda T.D. (2012) Reading span (RSPAN) task [Web application]. Available at <i>http://www.pitt.edu/~tol7/res/research/psych-tests/rspan</i>
+      </div>
+      <br />
+      <br />
+    </td>
+  </tr>
+
+  </table>
+</div>
+
+<br />
+<b>References</b><br />
+Conway, A.R.A., Kane, M.J., Bunting, M.F., Hambrick, D.Z., Wilhelm, O., Engle, R.W. (2005) Working memory span tasks: A methodological review and user's guide. Psychonomic Bulletin & Review, 12, 769-786.<br />
+<br />
+
+<span id="copy">&copy; <a href="http://tomekloboda.net">Tomek D Loboda</a> 2009-2012</span>
+
+</body>
+
+
+</html>
