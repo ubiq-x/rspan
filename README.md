@@ -1,4 +1,4 @@
-# Reading span (RSPAN) task
+# Reading Span (RSPAN) Task
 The reading span (RSPAN) task as a Web application.  This task estimates the size of the working memory capacity.
 
 
