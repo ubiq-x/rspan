@@ -20,7 +20,7 @@ Conway, A.R.A., Kane, M.J., Bunting, M.F., Hambrick, D.Z., Wilhelm, O., Engle, R
 
 
 ## Citing
-Loboda T.D. (2012) Reading span (RSPAN) task [Web application].  Available at: _https://ubiq-x.github.io/rspan_
+Loboda T.D. (2012) Reading Span (RSPAN) Task [Web application].  Available at: _https://ubiq-x.github.io/rspan_
 
 
 ## License
